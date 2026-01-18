@@ -1,28 +1,21 @@
-import { useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
+import { socket } from "../services/socket";
+import SensorChart from "./SensorChart";
+import ThresholdForm from "./ThresholdForm";
 
-export default function ThresholdForm() {
-    const [sensorType, setType] = useState("temperature");
-    const [min, setMin] = useState("");
-    const [max, setMax] = useState("");
+export default function Dashboard() {
+    const [data, setData] = useState([]);
 
-    const save = async () => {
-        await axios.post("http://localhost:5000/api/thresholds", {
-            sensorType, min, max
-        });
-        alert("Saved");
-    };
+    useEffect(() => {
+        socket.on("sensor:update", d =>
+            setData(prev => [...prev.slice(-20), d])
+        );
+    }, []);
 
     return (
-        <div>
-            <select onChange={e => setType(e.target.value)}>
-                <option>temperature</option>
-                <option>humidity</option>
-                <option>airQuality</option>
-            </select>
-            <input placeholder="Min" onChange={e => setMin(e.target.value)} />
-            <input placeholder="Max" onChange={e => setMax(e.target.value)} />
-            <button onClick={save}>Save Threshold</button>
-        </div>
+        <>
+            <ThresholdForm />
+            <SensorChart data={data} />
+        </>
     );
 }
