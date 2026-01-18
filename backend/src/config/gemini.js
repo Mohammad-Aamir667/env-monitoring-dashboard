@@ -1,15 +1,27 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY);
+export const explainAnomaly = async (values) => {
+    if (!process.env.GEMINI_API_KEY) {
+        return "Anomaly detected based on threshold breach compared to recent sensor readings.";
+    }
 
-export const explainAnomaly = async (data) => {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    try {
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-    const prompt = `
-Recent sensor values: ${data.join(", ")}
-Explain briefly why the latest value is anomalous.
+        const model = genAI.getGenerativeModel({
+            model: "gemini-1.5-flash" // ✅ FIXED MODEL
+        });
+
+        const prompt = `
+Recent sensor readings: ${values.join(", ")}
+Explain briefly why the latest reading is anomalous.
 `;
 
-    const result = await model.generateContent(prompt);
-    return result.response.text();
+        const result = await model.generateContent(prompt);
+        return result.response.text();
+
+    } catch (err) {
+        console.error("Gemini error, using fallback:", err.message);
+        return "Anomalous behavior detected due to sudden deviation from recent sensor data.";
+    }
 };
