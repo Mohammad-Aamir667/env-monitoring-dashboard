@@ -8,7 +8,7 @@ setInterval(() => {
         { sensorType: "humidity", value: 40 + Math.random() * 40 },
         { sensorType: "airQuality", value: 80 + Math.random() * 200 }
     ];
-
+    console.log("it is reading")
     sensors.forEach(s =>
         socket.emit("sensor:data", s)
     );
